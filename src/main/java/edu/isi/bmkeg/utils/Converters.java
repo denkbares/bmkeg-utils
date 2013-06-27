@@ -254,7 +254,7 @@ public class Converters {
 	 * @param dir
 	 * @throws Exception
 	 */
-	public static void recursivelyDeleteFiles(File dir) throws Exception {
+	public static void recursivelyDeleteFiles(File dir)  {
 
 		log.info("DELETING FILES FROM " + dir.getPath());
 
@@ -302,7 +302,7 @@ public class Converters {
 	}
 	
 	public static Map<String, File> recursivelyListFiles(File dir,
-			Map<String, File> m) throws Exception {
+			Map<String, File> m) {
 		
 		m.put(dir.getPath(), dir);
 		File[] fArray = dir.listFiles();
@@ -567,8 +567,7 @@ public class Converters {
 
 	}
 
-	public static void cleanItUp(Map<String, File> filesToClean)
-			throws Exception {
+	public static void cleanItUp(Map<String, File> filesToClean) {
 
 		Set<String> dirPathSet = new HashSet<String>();
 
@@ -949,5 +948,49 @@ public class Converters {
 		prefs.put(stem + ".bin.path", dir.getPath() );
 		
 	}
+	
+	public static File retrieveFileFromArchive(File f) throws IOException {
+		
+		File tempUnzippedDirectory = Files.createTempDir();
+
+		String dAddr = tempUnzippedDirectory.getAbsolutePath();
+
+		String wholePath = f.getPath();
+		String jarPath = wholePath.substring(0, wholePath.indexOf("!"));
+		if (jarPath.startsWith("file:"))
+			jarPath = jarPath.substring(5);
+
+		String entryPath = wholePath.substring(wholePath.indexOf("!") + 2,
+				wholePath.length());
+
+		entryPath = entryPath.replaceAll("\\\\", "/");
+
+		JarFile jarFile = new JarFile(jarPath);
+		ZipEntry entry = (ZipEntry) jarFile.getEntry(entryPath);
+
+		BufferedInputStream is = new BufferedInputStream(
+				jarFile.getInputStream(entry));
+		int currentByte;
+
+		// establish buffer for writing file
+		byte data[] = new byte[BUFFER];
+
+		// write the current file to disk
+		FileOutputStream fos = new FileOutputStream(dAddr + "/"
+				+ f.getName());
+		BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
+
+		// read and write until last byte is encountered
+		while ((currentByte = is.read(data, 0, BUFFER)) != -1) {
+			dest.write(data, 0, currentByte);
+		}
+		dest.flush();
+		dest.close();
+		is.close();
+
+		return new File(dAddr + "/" + f.getName());
+		
+	}
+	
 	
 }
