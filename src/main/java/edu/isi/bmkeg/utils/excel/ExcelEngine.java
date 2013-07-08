@@ -2,6 +2,7 @@ package edu.isi.bmkeg.utils.excel;
 
 import java.awt.Dimension;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -169,6 +170,29 @@ public class ExcelEngine implements HSSFListener {
 
 	}
 
+	
+	public void readByteArray(byte[] data) throws IOException {
+		
+		ByteArrayInputStream bis = new ByteArrayInputStream(data);
+
+		POIFSFileSystem poifs = new POIFSFileSystem(bis);
+		
+		InputStream din = poifs.createDocumentInputStream("Workbook");
+
+		HSSFRequest req = new HSSFRequest();
+
+		req.addListenerForAllRecords(this);
+
+		HSSFEventFactory factory = new HSSFEventFactory();
+
+		factory.processEvents(req, din);
+
+		bis.close();
+
+		din.close();
+
+	}
+	
 	public void readFile(File f) throws IOException {
 
 		if( !f.getName().endsWith(".xls") ) 
