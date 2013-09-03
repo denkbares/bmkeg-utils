@@ -1,5 +1,5 @@
 target
 .settings
-.classpath
-.project
+/.classpath
+/.project
 /apache-maven-3.0.4
