@@ -339,7 +339,7 @@ public class Converters {
 			if (fArray[i].isDirectory()) {
 				m.putAll(Converters.recursivelyListFiles(f, m, patt));
 			}
-
+			
 			match = patt.matcher(f.getName());
 			if (match.find())
 				m.put(f.getPath(), f);
