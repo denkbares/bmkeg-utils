@@ -52,9 +52,9 @@ public class SuperGraph implements Serializable {
 		edge.setGraph(this);
 		this.getEdges().add(edge);
 
-		edge.setName(toNode);
-		fromGraphNode.getOutgoingEdges().put(toNode, edge);
-		toGraphNode.getIncomingEdges().put(fromNode, edge);
+		edge.setName(fromNode + "->" + toNode);
+		fromGraphNode.getOutgoingEdges().put(edge.getName(), edge);
+		toGraphNode.getIncomingEdges().put(edge.getName(), edge);
 
 		edge.setInEdgeNode(toGraphNode);
 		edge.setOutEdgeNode(fromGraphNode);
@@ -206,7 +206,7 @@ public class SuperGraph implements Serializable {
 
 	}
 	
-	public List<SuperGraphEdge> readPath(SuperGraphNode s, SuperGraphNode t) {
+	public List<SuperGraphEdge> readPath(SuperGraphNode s, SuperGraphNode t) throws Exception {
 
 		List<SuperGraphEdge> edges = new ArrayList<SuperGraphEdge>();
 		
@@ -228,14 +228,21 @@ public class SuperGraph implements Serializable {
 				continue;
 		
 			SuperGraphEdge e = null;
-			if (ss.getOutgoingEdges().containsKey(tt.getName())) {
-				e = ss.getOutgoingEdges().get(tt.getName());
-			} else if (ss.getIncomingEdges().containsKey(tt.getName())) {
-				e = ss.getIncomingEdges().get(tt.getName());
-			} else if (t.getOutgoingEdges().containsKey(s.getName())) {
-				e = tt.getOutgoingEdges().get(ss.getName());
-			} else if (tt.getIncomingEdges().containsKey(ss.getName())) {
-				e = t.getIncomingEdges().get(s.getName());
+			for( SuperGraphEdge e2 : s.getOutgoingEdges().values() ) {
+				if( e2.getOutEdgeNode() == s && e2.getInEdgeNode() == t) {
+					e = e2;
+					break;
+				}
+			}
+			if( e == null ) {
+				for( SuperGraphEdge e2 : s.getIncomingEdges().values() ) {
+					if( e2.getInEdgeNode() == s && e2.getOutEdgeNode() == t) {
+						e = e2;
+						break;
+					}
+				}
+				if( e == null ) 
+					return new ArrayList<SuperGraphEdge>();
 			}
 			edges.add(e);
 		}
