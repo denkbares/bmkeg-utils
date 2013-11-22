@@ -4,6 +4,7 @@ package edu.isi.bmkeg.utils.xml;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -21,18 +23,26 @@ import javax.xml.bind.UnmarshallerHandler;
 import javax.xml.bind.ValidationEvent;
 import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.ValidationEventLocator;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.sax.SAXSource;
 
 import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 /**
  * Tools for working with the JAXB (XML Binding) library.
  */
 public class XmlBindingTools {
 
+	 private static final String EXTERNAL_DTD_LOADING_FEATURE = 
+			 "http://apache.org/xml/features/nonvalidating/load-external-dtd";
+	
 	/**
 	 * Parse the XML supplied by the reader into the corresponding tree of Java
 	 * objects.
@@ -46,10 +56,11 @@ public class XmlBindingTools {
 	 * @throws JAXBException
 	 *             if an error occurs parsing the XML.
 	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
 	 */
 	@SuppressWarnings("unchecked")
 	public static <E extends Object> E parseXML(Reader reader,
-			Class<E> rootElementClass) throws JAXBException, SAXException {
+			Class<E> rootElementClass) throws JAXBException, SAXException, ParserConfigurationException {
 
 		if (rootElementClass == null)
 			throw new IllegalArgumentException("rootElementClass is null");
@@ -57,12 +68,21 @@ public class XmlBindingTools {
 			throw new IllegalArgumentException("reader is null");
 
 		JAXBContext context = JAXBContext.newInstance(rootElementClass);
+		
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		spf.setNamespaceAware(true);
+        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
+        xmlReader.setFeature(EXTERNAL_DTD_LOADING_FEATURE, false);
+        InputSource inputSource = new InputSource(reader);
+        SAXSource source = new SAXSource(xmlReader, inputSource);
+		
 		Unmarshaller unmarshaller = context.createUnmarshaller();
-	   
+			   
 		CollectingValidationEventHandler handler = new CollectingValidationEventHandler();
 		unmarshaller.setEventHandler(handler);
 			    
-		E object = (E) unmarshaller.unmarshal(reader);
+		E object = (E) unmarshaller.unmarshal(source);
 
 		if (!handler.getMessages().isEmpty()) {
 			String errorMessage = "XML parse errors:";
@@ -74,7 +94,7 @@ public class XmlBindingTools {
 
 		return object;
 	}
-
+	
     public static void saveAsXml(Object rootElement, File xmlFile) throws Exception {
 
     	StringWriter writer = new StringWriter();
