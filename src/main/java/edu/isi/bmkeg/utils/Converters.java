@@ -18,6 +18,7 @@ import java.io.StringReader;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -192,6 +193,9 @@ public class Converters {
 	public static File extractFileFromJarClasspath(String classPath) throws IOException {
 		
 		InputStream is = Converters.class.getClassLoader().getResourceAsStream(classPath);
+		if(is == null)
+			return null;
+		
 		String fileName = classPath.substring(classPath.lastIndexOf("/")+1, classPath.length());
 		File file = new File( "./" + fileName ); 
 		OutputStream out = new FileOutputStream(file);
@@ -992,5 +996,10 @@ public class Converters {
 		
 	}
 	
-	
+	public static <T extends Comparable<? super T>> List<T> asSortedList(Collection<T> c) {
+		  List<T> list = new ArrayList<T>(c);
+		  java.util.Collections.sort(list);
+		  return list;
+		}
+
 }
