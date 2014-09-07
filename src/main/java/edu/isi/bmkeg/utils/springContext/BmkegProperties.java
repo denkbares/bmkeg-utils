@@ -1,7 +1,9 @@
 package edu.isi.bmkeg.utils.springContext;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -45,33 +47,33 @@ public class BmkegProperties {
 	private String workingDirectory;
 	private String persistenceUnitName;
 	
-	public static String readDbUrl() throws IOException  {
-		BmkegProperties bmkegProperties = new BmkegProperties(true);
+	public static String readDbUrl(boolean isTest) throws IOException  {
+		BmkegProperties bmkegProperties = new BmkegProperties(isTest);
 		return bmkegProperties.getDbUrl();
 	}
 	
-	public static String readDbUser() throws IOException {
-		BmkegProperties bmkegProperties = new BmkegProperties(true);
+	public static String readDbUser(boolean isTest) throws IOException {
+		BmkegProperties bmkegProperties = new BmkegProperties(isTest);
 		return bmkegProperties.getDbUser();
 	}	
 
-	public static String readDbPassword() throws IOException {
-		BmkegProperties bmkegProperties = new BmkegProperties(true);
+	public static String readDbPassword(boolean isTest) throws IOException {
+		BmkegProperties bmkegProperties = new BmkegProperties(isTest);
 		return bmkegProperties.getDbPassword();
 	}
 	
-	public static String readHomeDirectory() throws IOException {
-		BmkegProperties bmkegProperties = new BmkegProperties(true);
+	public static String readHomeDirectory(boolean isTest) throws IOException {
+		BmkegProperties bmkegProperties = new BmkegProperties(isTest);
 		return bmkegProperties.getHomeDirectory();
 	}
 	
-	public static String readWorkingDirectory() throws IOException {
-		BmkegProperties bmkegProperties = new BmkegProperties(true);
+	public static String readWorkingDirectory(boolean isTest) throws IOException {
+		BmkegProperties bmkegProperties = new BmkegProperties(isTest);
 		return bmkegProperties.getWorkingDirectory();
 	}
 
-	public static String readPersistenceUnitName() throws IOException  {
-		BmkegProperties bmkegProperties = new BmkegProperties(true);
+	public static String readPersistenceUnitName(boolean isTest) throws IOException  {
+		BmkegProperties bmkegProperties = new BmkegProperties(isTest);
 		return bmkegProperties.getPersistenceUnitName();
 	}
 
@@ -81,16 +83,43 @@ public class BmkegProperties {
 	public BmkegProperties() {}
 
 	/**
-	 * This is a modified constructor for nonSpring use. 
+	 * A modified constructor for nonSpring use, this is looking in 
+	 * Spring-like places for your properties file. 
+	 * 1. Your home directory: ~/bmkeg
+	 * 2. 
 	 */
 	public BmkegProperties(boolean isTest) throws IOException {
 		
 		Properties properties = new Properties();
+		
+		Map<String, String> env = System.getenv();
+		String homeDir = System.getProperty("user.home");
+		
+		String fileName = "/bmkeg/bmkeg.properties";
 		if( isTest )
-			properties.load(new FileInputStream("etc/bmkegtest.properties"));
-		else 
-			properties.load(new FileInputStream("etc/bmkeg.properties"));
-	
+			fileName = "/bmkeg/bmkegtest.properties";
+		
+		File propFile = new File(homeDir + fileName);
+		
+		if( propFile.exists() ) {
+
+			properties.load(new FileInputStream(propFile));			
+
+		} else if (env.containsKey("BMKEG_PROPERTIESFILE")){
+
+			String propFileEnv = env.get("BMKEG_PROPERTIESFILE");
+			propFile = new File(propFileEnv + fileName);
+			if( propFile.exists() )
+				properties.load(new FileInputStream(propFile));
+			else 
+				throw new IOException(propFile.getPath() + "does not exist.");
+			
+		} else {
+
+			throw new IOException("Properties file not specified");
+			
+		}
+					
 	    this.setDbPassword((String) properties.get(PROP_DBPASSWD));
 	    this.setDbUrl((String) properties.get(PROP_DBURL));
 	    this.setDbUser((String) properties.get(PROP_DBUSER));
@@ -104,11 +133,7 @@ public class BmkegProperties {
 
 		this.setHomeDirectory(homeDirectoryAddress);
 
-		try {
-			this.setWorkingDirectory((String) properties.get(PROP_WORKINGDIR));
-		} catch (Exception e) {
-			// do nothing if nothing is there. 
-		}
+		this.setWorkingDirectory((String) properties.get(PROP_WORKINGDIR));
 		
 	}
 

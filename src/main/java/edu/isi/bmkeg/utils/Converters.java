@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -25,13 +26,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.prefs.Preferences;
+import java.util.prefs.BackingStoreException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.Adler32;
@@ -51,6 +53,8 @@ import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
 
 import com.google.common.io.Files;
+
+import edu.isi.bmkeg.utils.springContext.BmkegProperties;
 
 public class Converters {
 
@@ -190,14 +194,14 @@ public class Converters {
 		return bytes;
 	}
 
-	public static File extractFileFromJarClasspath(String classPath) throws IOException {
+	public static File extractFileFromJarClasspath(String localDir, String classPath) throws IOException {
 		
 		InputStream is = Converters.class.getClassLoader().getResourceAsStream(classPath);
 		if(is == null)
 			return null;
 		
 		String fileName = classPath.substring(classPath.lastIndexOf("/")+1, classPath.length());
-		File file = new File( "./" + fileName ); 
+		File file = new File( localDir + "/" + fileName ); 
 		OutputStream out = new FileOutputStream(file);
 		int read = 0;
 		byte[] bytes = new byte[1024];
@@ -923,11 +927,31 @@ public class Converters {
 	
 		return Converters.checksum(cis);
 	}
-	
+
 	public static File readAppDirectory(String stem) throws Exception {
 		
-		Preferences prefs = Preferences.userRoot().node(Converters.class.getName());
-		String appBinPath = prefs.get(stem + ".bin.path", "");
+		File wd = new File(BmkegProperties.readWorkingDirectory(false));
+		
+		return readAppDirectory(stem, wd);
+	}
+
+	
+	public static File readAppDirectory(String stem, File wd) throws Exception {
+				
+		File propFile = new File(wd + "/webapp.properties");
+		Properties properties = new Properties();
+		
+		if( propFile.exists() ) {
+
+			properties.load(new FileInputStream(propFile));			
+
+		} else {
+
+			throw new IOException("Properties file not specified");
+			
+		}
+		
+		String appBinPath = (String) properties.get(stem + ".bin.path");
 		
 		if( appBinPath.length() > 0 ) {
 			
@@ -940,16 +964,22 @@ public class Converters {
 			
 		} else {
 		
-			return null;
+			throw new Exception( stem + " App directory is not set.\n");
 		
 		}
 		
 	}
 
-	public static void writeAppDirectory(String stem, File dir) {
+	public static void writeAppDirectory(String stem, File dir) throws Exception {
+
+		File wd = new File(BmkegProperties.readWorkingDirectory(false));
 		
-		Preferences prefs = Preferences.userRoot().node(Converters.class.getName());
-		prefs.put(stem + ".bin.path", dir.getPath() );
+		File propFile = new File(wd + "/webapp.properties");
+		Properties properties = new Properties();
+		
+		properties.setProperty(stem + ".bin.path", dir.getPath());
+		
+		properties.store(new FileWriter(propFile), "");
 		
 	}
 	
