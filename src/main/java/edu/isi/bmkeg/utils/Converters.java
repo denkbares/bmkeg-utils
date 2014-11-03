@@ -935,6 +935,47 @@ public class Converters {
 		return readAppDirectory(stem, wd);
 	}
 
+	public static String readAppUrl(String stem, File wd) throws Exception {
+		
+		File propFile = new File(wd + "/webapp.properties");
+		Properties properties = new Properties();
+		
+		if( propFile.exists() ) {
+
+			properties.load(new FileInputStream(propFile));			
+
+		} else {
+
+			throw new IOException("Properties file not specified");
+			
+		}
+		
+		String url = (String) properties.get(stem + ".url");
+		
+		if( url.length() > 0 ) {
+			
+			return url;
+			
+		} else {
+		
+			throw new Exception( stem + " URL is not set.\n");
+		
+		}
+		
+	}
+
+	public static void writeAppUrl(String stem, File dir) throws Exception {
+
+		File wd = new File(BmkegProperties.readWorkingDirectory(false));
+		
+		File propFile = new File(wd + "/webapp.properties");
+		Properties properties = new Properties();
+		
+		properties.setProperty(stem + ".url", dir.getPath());
+		
+		properties.store(new FileWriter(propFile), "");
+		
+	}
 	
 	public static File readAppDirectory(String stem, File wd) throws Exception {
 				
