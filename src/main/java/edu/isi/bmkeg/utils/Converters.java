@@ -16,6 +16,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -994,7 +995,7 @@ public class Converters {
 		
 		String appBinPath = (String) properties.get(stem + ".bin.path");
 		
-		if( appBinPath.length() > 0 ) {
+		if( appBinPath!= null && appBinPath.length() > 0 ) {
 			
 			File appBinDir = new File(appBinPath);			
 			if( !appBinDir.exists() ) {
@@ -1011,10 +1012,8 @@ public class Converters {
 		
 	}
 
-	public static void writeAppDirectory(String stem, File dir) throws Exception {
+	public static void writeAppDirectory(String stem, File dir, File wd) throws Exception {
 
-		File wd = new File(BmkegProperties.readWorkingDirectory(false));
-		
 		File propFile = new File(wd + "/webapp.properties");
 		Properties properties = new Properties();
 		
@@ -1072,5 +1071,44 @@ public class Converters {
 		  java.util.Collections.sort(list);
 		  return list;
 		}
+	
+	public static URI convertUmlAddressToUri(String path) throws Exception {
+		
+		if( path.startsWith("|.") ) {
+			path = path.substring(2,path.length());
+		}
+		
+		Pattern pattern = Pattern.compile("\\.model(\\.|$)");
+		Matcher matcher = pattern.matcher(path);
+		int modelPos = -1;
+		int modelLength = -1;
+		if( matcher.find() ) { 
+			modelPos = matcher.start();
+			modelLength = 7;
+		} else { 
+			modelPos = path.lastIndexOf(".");
+			modelLength = 0;
+		}
+		
+		URI uri = null;
+		
+		String url = "http://";
+		String pre = path.substring(0, modelPos);
+		String[] bits = pre.split("\\.");
+		
+		for(int i=bits.length-2; i>=0; i--) {
+			url += bits[i] + "." ;
+		}
+		url = url.substring(0, url.length()-1 ) + "/" + bits[bits.length-1] + "/";
+		
+		if(modelPos+modelLength < path.length()){ 
+			String post = path.substring(modelPos + modelLength, path.length());
+			url += post.replaceAll("\\.", "/");
+		}
+		uri = new URI(url);
+		
+		return uri;
+	
+	}
 
 }

@@ -11,8 +11,8 @@ import edu.isi.bmkeg.utils.Converters;
 
 public class LocalMavenInstall {
 	
-	public static String MVN_FILE = "apache-maven-3.0.4-bin.zip";
-	public static String MVN_VERSION = "apache-maven-3.0.4";
+	public static String MVN_FILE = "apache-maven-3.3.3-bin.zip";
+	public static String MVN_VERSION = "apache-maven-3.3.3";
 		
 	public static String runMavenCommand(String options) throws Exception {
 		
@@ -46,8 +46,7 @@ public class LocalMavenInstall {
 		String out = "";
 		
 		// Maven CLI interface does not work. Use the local exec function
-		Runtime r = Runtime.getRuntime();
-		Process p = r.exec(cmd);
+		Process p = new ProcessBuilder(cmd.split(" ")).start();
 		
 		// If this fails, use a local, prepacked version of 
 		// Maven that we unpack to a temp directory 
@@ -143,9 +142,9 @@ public class LocalMavenInstall {
 		// 
 		String osName = System.getProperty("os.name");
 		if( osName.toLowerCase().indexOf("win") >= 0 ) {
-			//LocalMavenInstall.runCommand(mvnExec.getPath());			
+			LocalMavenInstall.runCommand(mvnExec.getPath());			
 		} else {
-			LocalMavenInstall.runCommand("chmod +x " + mvnExec.getPath());
+			//LocalMavenInstall.runCommand("chmod +x " + mvnExec.getPath());
 		}
 		
 	}

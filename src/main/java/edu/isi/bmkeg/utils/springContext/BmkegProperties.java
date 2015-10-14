@@ -86,7 +86,7 @@ public class BmkegProperties {
 	 * A modified constructor for nonSpring use, this is looking in 
 	 * Spring-like places for your properties file. 
 	 * 1. Your home directory: ~/bmkeg
-	 * 2. 
+	 * 2. environment variable: BMKEG_PROPERTIESFILE
 	 */
 	public BmkegProperties(boolean isTest) throws IOException {
 		
@@ -137,6 +137,43 @@ public class BmkegProperties {
 		
 	}
 
+	/**
+	 * A modified constructor for nonSpring use, this is looking in 
+	 * Spring-like places for your properties file. 
+	 * 1. Your home directory: ~/bmkeg
+	 * 2. environment variable: BMKEG_PROPERTIESFILE
+	 */
+	public BmkegProperties(File propFile) throws IOException {
+		
+		Properties properties = new Properties();
+
+		if( propFile.exists() ) {
+
+			properties.load(new FileInputStream(propFile));			
+
+		} else {
+
+			throw new IOException("Properties file not specified");
+			
+		}
+					
+	    this.setDbPassword((String) properties.get(PROP_DBPASSWD));
+	    this.setDbUrl((String) properties.get(PROP_DBURL));
+	    this.setDbUser((String) properties.get(PROP_DBUSER));
+	    this.setDbDriver((String) properties.get(PROP_DBDRIVER));
+	    this.setPersistenceUnitName((String) properties.get(PROP_PERSISTENCEUNIT));
+
+	    String fileSeparator = System.getProperty("file.separator",".");
+	    String homeDirectoryAddress = (String) properties.get(PROP_HOMEDIR);
+		if( homeDirectoryAddress == null || !homeDirectoryAddress.endsWith(fileSeparator))
+			homeDirectoryAddress += fileSeparator;
+
+		this.setHomeDirectory(homeDirectoryAddress);
+
+		this.setWorkingDirectory((String) properties.get(PROP_WORKINGDIR));
+		
+	}
+	
 	public void setDbUrl(String dbUrl) {
 		this.dbUrl = dbUrl;
 	}
