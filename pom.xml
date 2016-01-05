@@ -4,7 +4,7 @@
 
 	<groupId>edu.isi.bmkeg</groupId>
 	<artifactId>bmkeg-utils</artifactId>
-	<version>1.1.5-SNAPSHOT</version>
+	<version>1.2.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>BMKEG General Utilities</name>
 	<description>General purpose utilities for file and string manipulation within BMKEG code.</description>
@@ -12,7 +12,7 @@
 	<parent>
 	    <groupId>edu.isi.bmkeg</groupId>
 	    <artifactId>bmkeg-parent</artifactId>
-	    <version>1.1.5-SNAPSHOT</version>
+	    <version>1.2.0-SNAPSHOT</version>
 	    <relativePath>../bmkeg-parent</relativePath>
  	</parent>
 
