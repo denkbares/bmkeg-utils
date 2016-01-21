@@ -5,3 +5,4 @@
 .project
 /apache-maven-*
 /bin
+/build
