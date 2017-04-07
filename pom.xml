@@ -8,15 +8,15 @@
 	<packaging>jar</packaging>
 	<name>BMKEG General Utilities</name>
 	<description>General purpose utilities for file and string manipulation within BMKEG code.</description>
-	
-	<parent>
-	    <groupId>edu.isi.bmkeg</groupId>
-	    <artifactId>bmkeg-parent</artifactId>
-	    <version>1.2.0-SNAPSHOT</version>
-	    <relativePath>../bmkeg-parent</relativePath>
- 	</parent>
 
-	<scm/>
+	<parent>
+		<groupId>edu.isi.bmkeg</groupId>
+		<artifactId>bmkeg-parent</artifactId>
+		<version>1.2.0-SNAPSHOT</version>
+		<relativePath>../bmkeg-parent</relativePath>
+	</parent>
+
+	<scm />
 
 	<developers>
 		<developer>
@@ -61,6 +61,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.jgrapht</groupId>
+			<artifactId>jgrapht-jdk1.6</artifactId>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>r09</version>
@@ -75,13 +82,13 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
-			
+
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 			<version>0.9.10</version>
 		</dependency>
-			
+
 	</dependencies>
 
 </project>

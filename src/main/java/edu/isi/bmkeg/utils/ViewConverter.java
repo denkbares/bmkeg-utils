@@ -70,7 +70,7 @@ public class ViewConverter {
 		Map<String, Method> baseMethods = getMethodsLookup(baseObject.getClass());
 
 		for( String methodName : viewMethods.keySet() ) {
-			if( !methodName.startsWith("get") ) 
+			if( !methodName.startsWith("get") || methodName.equals("getClass") ) 
 				continue;
 			
 			Method getter = viewMethods.get(methodName);
@@ -92,9 +92,9 @@ public class ViewConverter {
 
 			} else if(o instanceof List) {
 			
-				Type baseT = ((ParameterizedType) setter.getGenericReturnType())
+				Type viewT = ((ParameterizedType) getter.getGenericReturnType())
 						.getActualTypeArguments()[0];
-				Type viewT = ((ParameterizedType) getter.getGenericParameterTypes()[0])
+				Type baseT = ((ParameterizedType) setter.getGenericParameterTypes()[0])
 						.getActualTypeArguments()[0];
 				
 				Class<X> clazz = (Class<X>) getClass(baseT);
@@ -102,7 +102,7 @@ public class ViewConverter {
 				
 				for( Object lo : (List) o ) {						
 					Object loo = clazz.newInstance();
-					loo = this.baseObjectToView(lo, loo);
+					loo = this.viewObjectToBase(lo, loo);
 					ll.add((X) loo);
 				}
 				setter.invoke(baseObject, ll);
@@ -119,7 +119,7 @@ public class ViewConverter {
 					
 					Constructor cons = c.getConstructor(new Class[]{cc});
 					Object o2 = cons.newInstance(o);
-					setter.invoke(viewObject, o2);
+					setter.invoke(baseObject, o2);
 
 				}
 			}
